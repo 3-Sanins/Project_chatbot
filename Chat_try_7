@@ -1,0 +1,193 @@
+Here's the updated code with all the previous features:
+
+```
+import speech_recognition as sr
+import pyttsx3
+import pyaudio
+import youtube_dl
+import wikipedia
+import pyjokes
+import requests
+import os
+import multiprocessing
+
+# Initialize speech recognition and text-to-speech engines
+r = sr.Recognizer()
+engine = pyttsx3.init()
+
+# News API Key (from newsapi.org)
+news_api_key = "YOUR_NEWS_API_KEY"
+
+# Weather API Key (from openweathermap.org)
+weather_api_key = "YOUR_WEATHER_API_KEY"
+
+# Song cache directory
+song_cache_dir = "song_cache"
+
+# Create song cache directory if it doesn't exist
+if not os.path.exists(song_cache_dir):
+    os.makedirs(song_cache_dir)
+
+# Define functions
+def play_song(song_name):
+    # Check if song is cached
+    song_path = os.path.join(song_cache_dir, song_name + ".mp3")
+    if os.path.exists(song_path):
+        # Play cached song
+        engine.say("Playing " + song_name)
+        engine.runAndWait()
+        os.system(f"start {song_path}")  # For Windows
+    else:
+        # Download and play song
+        ydl_opts = {'format': 'bestaudio', 'outtmpl': song_cache_dir + '/%(title)s.%(ext)s'}
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([song_name])
+            engine.say("Playing " + song_name)
+            engine.runAndWait()
+
+def get_info(query):
+    try:
+        result = wikipedia.summary(query, sentences=2)
+        engine.say(result)
+        engine.runAndWait()
+    except wikipedia.exceptions.PageError:
+        engine.say("Sorry, couldn't find information on that topic.")
+Here's the updated code with all the previous features:
+
+```
+import speech_recognition as sr
+import pyttsx3
+import pyaudio
+import youtube_dl
+import wikipedia
+import pyjokes
+import requests
+import os
+import multiprocessing
+
+# Initialize speech recognition and text-to-speech engines
+r = sr.Recognizer()
+engine = pyttsx3.init()
+
+# News API Key (from newsapi.org)
+news_api_key = "YOUR_NEWS_API_KEY"
+
+# Weather API Key (from openweathermap.org)
+weather_api_key = "YOUR_WEATHER_API_KEY"
+
+# Song cache directory
+song_cache_dir = "song_cache"
+
+# Create song cache directory if it doesn't exist
+if not os.path.exists(song_cache_dir):
+    os.makedirs(song_cache_dir)
+
+# Define functions
+def play_song(song_name):
+    # Check if song is cached
+    song_path = os.path.join(song_cache_dir, song_name + ".mp3")
+    if os.path.exists(song_path):
+        # Play cached song
+        engine.say("Playing " + song_name)
+        engine.runAndWait()
+        os.system(f"start {song_path}")  # For Windows
+    else:
+        # Download and play song
+        ydl_opts = {'format': 'bestaudio', 'outtmpl': song_cache_dir + '/%(title)s.%(ext)s'}
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([song_name])
+            engine.say("Playing " + song_name)
+            engine.runAndWait()
+
+def get_info(query):
+    try:
+        result = wikipedia.summary(query, sentences=2)
+        engine.say(result)
+        engine.runAndWait()
+    except wikipedia.exceptions.PageError:
+        engine.say("Sorry, couldn't find information on that topic.")
+
+def tell_joke():
+    joke = pyjokes.get_joke()
+    engine.say(joke)
+    engine.runAndWait()
+
+def get_news(location):
+    url = f"https://newsapi.org/v2/top-headlines?country=us&city={location}&apiKey={news_api_key}"
+    response = requests.get(url)
+    data = response.json()
+    engine.say("Here are the top headlines in " + location + ":")
+    for article in data['articles'][:5]:
+        engine.say(article['title'])
+        engine.runAndWait()
+
+def get_weather(city):
+    base_url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={weather_api_key}&units=metric"
+    response = requests.get(base_url)
+    data = response.json()
+    weather_description = data['weather'][0]['description']
+    temperature = data['main']['temp']
+    engine.say(f"Weather in {city}: {weather_description}, Temperature: {temperature} degrees Celsius")
+    engine.runAndWait()
+
+def recognize_speech(audio):
+    try:
+        query = r.recognize_google(audio, language='en-US')
+        return query
+    except sr.UnknownValueError:
+        engine.say("Sorry, didn't catch that.")
+        engine.runAndWait()
+
+def chatbot_listening():
+    with sr.Microphone() as source:
+        while True:
+            audio = r.listen(source)
+            query = recognize_speech(audio)
+            print("User said: " + query)
+
+            # Handle user queries
+            if "play" in query:
+                song_name = query.replace("play", "")
+                multiprocessing.Process(target=play_song, args=(song_name,)).start()
+            elif "what is" in query:
+                multiprocessing.Process(target=get_info, args=(query.replace("what is", ""),)).start()
+            elif "joke" in query:
+                multiprocessing.Process(target=tell_joke).start()
+            elif "news" in query:
+                location = query.replace("news", "")
+                multiprocessing.Process(target=get_news, args=(location,)).start()
+            elif "weather" in query:
+                city = query.replace("weather", "")
+                multiprocessing.Process(target=get_weather, args=(city,)).start()
+            elif "hello" in query:
+                engine.say("Hello! How can I assist you today?")
+                engine.runAndWait()
+            else:
+                engine.say("Sorry, didn't understand that.")
+                engine.runAndWait()
+
+def main():
+    try:
+        chatbot_listening()
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        engine.say("Sorry, an error occurred.")
+        engine.runAndWait()
+
+if __name__ == "__main__":
+    main()
+```
+
+This updated code includes:
+
+1. Speech recognition
+2. Text-to-speech
+3. Song playback
+4. Wikipedia information retrieval
+5. Jokes
+6. News from specific locations
+7. Weather updates
+
+Replace `YOUR_NEWS_API_KEY` and `YOUR_WEATHER_API_KEY` with your actual API keys.
+
+Would you like me to clarify any of these features?￼Enter
