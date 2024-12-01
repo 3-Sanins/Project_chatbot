@@ -3,7 +3,7 @@ import speech_recognition as sr
 import pyttsx3  # Offline text-to-speech
 import requests
 from datetime import datetime
-import time
+import time,serial
 import vlc
 import yt_dlp
 
@@ -14,6 +14,11 @@ NEWS_API_KEY = 'bee5cc758c7145cebb9c95cef0c51e2e'
 
 # Initialize the Cohere client
 co = cohere.Client(COHERE_API_KEY)
+
+bluetooth_port = 'COM5' # Bluetooth COM port
+baud_rate = 9600 # The same baud rate used in your Arduino code
+arduino_bluetooth = serial.Serial(bluetooth_port, baud_rate)
+time.sleep(2)
 
 # Initialize pyttsx3 engine
 engine = pyttsx3.init()
@@ -193,6 +198,7 @@ def handle_user_input():
         user_input = listen()
         if not user_input:
             continue
+        user_input=user_input.lower()
         if "stop" in user_input:
             if "moving" in user_input:
                 pass
@@ -200,7 +206,23 @@ def handle_user_input():
                 stop_speaking()
 
         if "move" in user_input:
-            speak("This function can only be used with arduino")
+            if "left" in user_input:
+                command="L"
+            elif "right" in user_input:
+                command="R"
+            elif "straight" in user_input:
+                if "left" in user_input:
+                    command="G"
+                elif "right" in user_input:
+                    command="I"
+                else:
+                    command="F"
+            elif "back" in user_input:
+                command="B"
+            elif "stop" in user_input:
+                command="s"
+            arduino_bluetooth.write(command.encode())
+            #speak("This function can only be used with arduino")
 
         if user_input in ["bye", "exit", "quit"]:
             speak("Goodbye!")
