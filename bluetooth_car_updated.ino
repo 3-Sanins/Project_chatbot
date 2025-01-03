@@ -47,6 +47,9 @@ void loop() {
   if (received=='l'){
     left();
   }
+  if (received=='s'){
+    stop();
+  }
 
 
   // Check if data is available from Serial Monitor (for testing)
@@ -83,3 +86,9 @@ void left(){
   motor3.run(FORWARD);
 }
 
+void stop(){
+  motor1.run(RELEASE);
+  motor2.run(RELEASE);
+  motor3.run(RELEASE);
+  motor4.run(RELEASE);
+}
